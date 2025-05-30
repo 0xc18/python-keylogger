@@ -1,8 +1,6 @@
 name: Build EXE with Nuitka
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:

