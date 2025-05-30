@@ -27,7 +27,7 @@ jobs:
       env:
         NUITKA_DOWNLOAD_DEPENDENCIES_AUTO: "yes"
       run: |
-        nuitka keylogger.py --standalone --onefile --windows-disable-console
+        nuitka keylogger.py --standalone --onefile --windows-disable-console --assume-yes-for-downloads
 
 
     - name: Upload EXE as artifact
